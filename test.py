@@ -4,16 +4,12 @@ import re
 import config
 from twython import Twython, TwythonError, TwythonStreamer, TwythonStreamError
 
-twitter = Twython(
-
-
-)
-
 
 class MyStreamer(TwythonStreamer):
     def on_success(self, data):
         if 'text' in data:
             print(data['text'])
+            twitter.update_status(status=data['text'])
 
     def on_error(self, status_code, data):
         print(status_code)
@@ -23,6 +19,8 @@ class MyStreamer(TwythonStreamer):
         # self.disconnect()
 
 
+twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
+                  config.TW_TOKEN, config.TW_TOKEN_SECRET)
 stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                     config.TW_TOKEN, config.TW_TOKEN_SECRET)
-stream.statuses.filter(track='twitter')
+stream.statuses.filter(track='#星翼時報')
