@@ -9,7 +9,7 @@ import datetime
 
 class MyStreamer(TwythonStreamer):
     def on_success(self, data):
-        if 'text' in data:
+        if 'text' in data and 'user' != 'SW_Timesignal':
             print(data['text'])
             if len(re.findall('[0-9]+:[0-9]+', str(data['text']))):
                 if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', str(data['text']))):
@@ -37,7 +37,7 @@ class MyStreamer(TwythonStreamer):
             tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
                      (time[0], username))
             print(tweet)
-#            twitter.update_status(status=tweet)
+            twitter.update_status(status=tweet)
 
     def on_error(self, status_code, data):
         print(status_code)
