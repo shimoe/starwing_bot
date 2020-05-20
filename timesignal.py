@@ -23,6 +23,11 @@ class MyStreamer(TwythonStreamer):
                     time[0] = str(dt_now.month) + '/' + \
                         str(dt_now.day) + ' ' + str(time[0])
                     # print(time[0])
+                username = data['user']['screen_name']
+                tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
+                         (time[0], username))
+                # print(tweet)
+                twitter.update_status(status=tweet)
             elif len(re.findall('[0-9]+時[0-9]+分', str(data['text']))):
                 if len(re.findall('[0-9]+月[0-9]+日*[0-9]+時[0-9]+分', str(data['text']))):
                     time = re.findall(
@@ -33,11 +38,13 @@ class MyStreamer(TwythonStreamer):
                     time[0] = str(dt_now.month) + '月' + \
                         str(dt_now.day) + '日 ' + str(time[0])
                     # print(time[0])
-            username = data['user']['screen_name']
-            tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼時報" %
-                     (time[0], username))
-            # print(tweet)
-            twitter.update_status(status=tweet)
+                username = data['user']['screen_name']
+                tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
+                         (time[0], username))
+                # print(tweet)
+                twitter.update_status(status=tweet)
+            else:
+                print()
 
     def on_error(self, status_code, data):
         print(status_code)
