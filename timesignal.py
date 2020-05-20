@@ -10,8 +10,8 @@ import datetime
 class MyStreamer(TwythonStreamer):
     def on_success(self, data):
         dt_now = datetime.datetime.now()
-        if 'text' in data and data['user']['screen_name'] != 'SW_Timesignal':
-            # print(data['text'])
+        if 'text' in data and data['user']['screen_name'] != 'SW_Timesignal' and data['retweeted_status']['id'] < 1:
+            print(data, sep='\n')
             if len(re.findall('[0-9]+:[0-9]+', str(data['text']))):
                 if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', str(data['text']))):
                     time = re.findall(
@@ -44,7 +44,7 @@ class MyStreamer(TwythonStreamer):
                 # print(tweet)
                 twitter.update_status(status=tweet)
             else:
-                print()
+                print(data['retweeted_status']['id'])
 
     def on_error(self, status_code, data):
         print(status_code)
