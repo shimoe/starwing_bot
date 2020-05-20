@@ -9,7 +9,12 @@ class MyStreamer(TwythonStreamer):
     def on_success(self, data):
         if 'text' in data:
             print(data['text'])
-            twitter.update_status(status=data['text'])
+            if len(re.findall('[0-9]+:[0-9]+', str(data['text']))):
+                time = re.findall('[0-9]+:[0-9]+', str(data['text']))
+            elif len(re.findall('[0-9]+時[0-9]+分', str(data['text']))):
+                time = re.findall('[0-9]+時[0-9]+分', str(data['text']))
+            print(time)
+            # twitter.update_status(status=data['text'])
 
     def on_error(self, status_code, data):
         print(status_code)
