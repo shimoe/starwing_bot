@@ -10,10 +10,21 @@ class MyStreamer(TwythonStreamer):
         if 'text' in data:
             print(data['text'])
             if len(re.findall('[0-9]+:[0-9]+', str(data['text']))):
-                time = re.findall('[0-9]+:[0-9]+', str(data['text']))
+                if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', str(data['text']))):
+                    time = re.findall(
+                        '[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', str(data['text']))
+                    print(time)
+                else:
+                    time = re.findall(
+                        '[0-9]+:[0-9]+', str(data['text']))
+                    print(time, 'no date')
             elif len(re.findall('[0-9]+時[0-9]+分', str(data['text']))):
-                time = re.findall('[0-9]+時[0-9]+分', str(data['text']))
-            print(time)
+                if len(re.findall('[0-9]+月[0-9]+日*[0-9]+時[0-9]+分', str(data['text']))):
+                    time = re.findall('[0-9]+時[0-9]+分', str(data['text']))
+                    print(time)
+                else:
+                    time = re.findall('[0-9]+時[0-9]+分', str(data['text']))
+                    print(time, 'jap_nodate')
             # twitter.update_status(status=data['text'])
 
     def on_error(self, status_code, data):
