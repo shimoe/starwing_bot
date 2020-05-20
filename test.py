@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+#coding: UTF-8
 
 import re
 import config
@@ -13,19 +14,24 @@ class MyStreamer(TwythonStreamer):
                 if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', str(data['text']))):
                     time = re.findall(
                         '[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', str(data['text']))
-                    print(time)
+                    print(time[0])
                 else:
                     time = re.findall(
                         '[0-9]+:[0-9]+', str(data['text']))
-                    print(time, 'no date')
+                    print(time[0], 'no date')
             elif len(re.findall('[0-9]+時[0-9]+分', str(data['text']))):
                 if len(re.findall('[0-9]+月[0-9]+日*[0-9]+時[0-9]+分', str(data['text']))):
-                    time = re.findall('[0-9]+時[0-9]+分', str(data['text']))
-                    print(time)
+                    time = re.findall(
+                        '[0-9]+月[0-9]+日*[0-9]+時[0-9]+分', str(data['text']))
+                    print(time[0])
                 else:
                     time = re.findall('[0-9]+時[0-9]+分', str(data['text']))
-                    print(time, 'jap_nodate')
-            # twitter.update_status(status=data['text'])
+                    print(time[0], 'jap_nodate')
+            username = data['user']['screen_name']
+            tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
+                     (time[0], username))
+            print(tweet)
+            twitter.update_status(status=tweet)
 
     def on_error(self, status_code, data):
         print(status_code)
