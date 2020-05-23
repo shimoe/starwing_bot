@@ -17,12 +17,7 @@ class MyStreamer(TwythonStreamer):
     def parse_tweet(self, data):
         dt_now = datetime.datetime.now()
         tweet_time = data['created_at']
-        print('---------------------------------')
-        if 'retweeted_status' in data:
-            print('Retweeted tweet')
-        elif data['user']['screen_name'] == 'SW_Timesignal':
-            print('self tweet')
-        elif 'text' in data:
+        if 'text' in data and data['user']['screen_name'] != 'SW_Timesignal' and 'retweeted_status' not in data:
             tweet = ''
             if len(re.findall('[0-9]+:[0-9]+', str(data['text']))):
                 if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', str(data['text']))):
@@ -53,7 +48,8 @@ class MyStreamer(TwythonStreamer):
                 tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
                          (time[0], username))
             print(tweet)
-            # twitter.update_status(status=tweet)
+            twitter.update_status(status=tweet)
+            print('tweet success')
         else:
             print('unkwon error')
 
