@@ -5,6 +5,7 @@ import re
 import config
 from twython import Twython, TwythonError, TwythonStreamer, TwythonStreamError
 import datetime
+import codecs
 
 
 class MyStreamer(TwythonStreamer):
@@ -56,6 +57,8 @@ class MyStreamer(TwythonStreamer):
             # twitter.update_status(status=tweet)
         else:
             print('unkwon error')
+            print(data, sep='\n', end='------------------------------',
+                  file=codecs.open('log.txt', 'w', 'utf-8'))
 
         # Want to stop trying to get data because of the error?
         # Uncomment the next line!

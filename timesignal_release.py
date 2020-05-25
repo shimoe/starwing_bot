@@ -5,6 +5,7 @@ import re
 import config
 from twython import Twython, TwythonError, TwythonStreamer, TwythonStreamError
 import datetime
+import codecs
 
 
 class MyStreamer(TwythonStreamer):
@@ -17,7 +18,12 @@ class MyStreamer(TwythonStreamer):
     def parse_tweet(self, data):
         dt_now = datetime.datetime.now()
         tweet_time = data['created_at']
-        if 'text' in data and data['user']['screen_name'] != 'SW_Timesignal' and 'retweeted_status' not in data:
+        print('---------------------------------')
+        if 'retweeted_status' in data:
+            print('Retweeted tweet')
+        elif data['user']['screen_name'] == 'SW_Timesignal':
+            print('self tweet')
+        elif 'text' in data:
             tweet = ''
             if len(re.findall('[0-9]+:[0-9]+', str(data['text']))):
                 if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', str(data['text']))):
@@ -49,17 +55,20 @@ class MyStreamer(TwythonStreamer):
                          (time[0], username))
             print(tweet)
             twitter.update_status(status=tweet)
-            print('tweet success')
+            print('tweet success!')
         else:
             print('unkwon error')
+            print(data, sep='\n', end='------------------------------',
+                  file=codecs.open('log.txt', 'w', 'utf-8'))
 
         # Want to stop trying to get data because of the error?
         # Uncomment the next line!
         # self.disconnect()
 
 
-twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
-                  config.TW_TOKEN, config.TW_TOKEN_SECRET)
-stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
-                    config.TW_TOKEN, config.TW_TOKEN_SECRET)
-stream.statuses.filter(track='#星翼時報')
+while True:
+    twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
+                      config.TW_TOKEN, config.TW_TOKEN_SECRET)
+    stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
+                        config.TW_TOKEN, config.TW_TOKEN_SECRET)
+    stream.statuses.filter(track='#星翼時報')
