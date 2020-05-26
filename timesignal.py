@@ -10,6 +10,14 @@ import codecs
 
 class MyStreamer(TwythonStreamer):
     def on_success(self, data):
+        print('---------------------------------')
+        if 'retweeted_status' in data:
+            print('Retweeted tweet')
+        elif data['user']['screen_name'] == 'SW_Timesignal':
+            print('self tweet')
+        elif 'quoted_status' in data:
+            print('Quoted tweet')
+        else:
         self.parse_tweet(data)
 
     def on_error(self, status_code, data):
@@ -17,12 +25,6 @@ class MyStreamer(TwythonStreamer):
 
     def parse_tweet(self, data):
         dt_now = datetime.datetime.now()
-        tweet_time = data['created_at']
-        print('---------------------------------')
-        if 'retweeted_status' in data:
-            print('Retweeted tweet')
-        elif data['user']['screen_name'] == 'SW_Timesignal':
-            print('self tweet')
         elif 'text' in data:
             tweet = ''
             if len(re.findall('[0-9]+:[0-9]+', str(data['text']))):
