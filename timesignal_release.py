@@ -23,6 +23,8 @@ class MyStreamer(TwythonStreamer):
             print('Retweeted tweet')
         elif data['user']['screen_name'] == 'SW_Timesignal':
             print('self tweet')
+        elif 'quoted_status' in data:
+            print('Quoted tweet')
         elif 'text' in data:
             tweet = ''
             if len(re.findall('[0-9]+:[0-9]+', str(data['text']))):
