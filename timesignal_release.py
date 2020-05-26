@@ -54,7 +54,8 @@ class MyStreamer(TwythonStreamer):
                 tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
                          (time[0], username))
             print(tweet)
-            # twitter.update_status(status=tweet)
+            twitter.update_status(status=tweet)
+            print('tweet success!')
         else:
             print('unkwon error')
             print(data, sep='\n', end='------------------------------',
@@ -65,8 +66,9 @@ class MyStreamer(TwythonStreamer):
         # self.disconnect()
 
 
-twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
-                  config.TW_TOKEN, config.TW_TOKEN_SECRET)
-stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
-                    config.TW_TOKEN, config.TW_TOKEN_SECRET)
-stream.statuses.filter(track='#星翼時報')
+while True:
+    twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
+                      config.TW_TOKEN, config.TW_TOKEN_SECRET)
+    stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
+                        config.TW_TOKEN, config.TW_TOKEN_SECRET)
+    stream.statuses.filter(track='#星翼時報')
