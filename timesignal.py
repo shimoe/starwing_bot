@@ -32,36 +32,42 @@ class MyStreamer(TwythonStreamer):
 
             # if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', data['text'])) or len(re.findall('[0-9]+月[0-9]+日*[0-9]+時[0-9]+分', data['text'])):
             tweet_text = data['text'].splitlines()
-            print(tweet_text)
+            # print(tweet_text)
             for line in tweet_text:
                 if len(re.findall('[0-9]+:[0-9]+', line)) > 0:
                     if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', line)):
                         time.extend(re.findall(
                             '[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', line))
                     else:
-                        time.extend(re.findall('[0-9]+:[0-9]+', line))
+                        nodate = re.findall('[0-9]+:[0-9]+', line)
+                        for i in nodate:
+                            item = str(dt_now.month) + '/' + \
+                                str(dt_now.day) + ' ' + i
+                            time.append(item)
                 elif len(re.findall('[0-9]+時[0-9]+分', line)) > 0:
-                    if len(re.findall('[0-9]+月[0-9]+日.[0-9]+時[0-9]+分', line)):
+                    if len(re.findall('[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line)):
                         time.extend(re.findall(
-                            '[0-9]+月[0-9]+日.[0-9]+時[0-9]+分', line))
+                            '[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line))
                     else:
-                        time.extend(re.findall('[0-9]+時[0-9]+分', line))
+                        nodate = re.findall('[0-9]+時[0-9]+分', line)
+                        for i in nodate:
+                            item = str(dt_now.month) + '月' + str(dt_now.day) + \
+                                '日' + ' ' + i
+                            time.append(item)
                 else:
                     print('no time in line')
 
-            print(time)
-            print('*******************')
+            # print(time)
+            # print('*******************')
 
             # if len(time):
             #    for index, item in enumerate(time):
             #        print('*******************')
             #        if len(re.findall('\/', str(item))) > 0:
-            #            time[index] = (str(dt_now.month) + '/' +
-            #                           str(dt_now.day) + ' ' + str(item))
+            #            time[index] = (str(dt_now.month) + '/' + str(dt_now.day) + ' ' + str(item))
             #            print(time[index])
             #        elif len(re.findall('日', str(item))) > 0:
-            #            time[index] = (str(dt_now.month) + '月' +
-            #                           str(dt_now.day) + '日' + ' ' + str(item))
+            #            time[index] = (str(dt_now.month) + '月' + str(dt_now.day) + '日' + ' ' + str(item))
             #            print(time[index])
             #        else:
             #            print(time[index])
@@ -69,10 +75,11 @@ class MyStreamer(TwythonStreamer):
             #        #    str(dt_now.day) + '日 ' + str(time[0])
             #    print(time)
 
-            tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
-                     (time[0], username))
-            print(tweet)
-            # twitter.update_status(status=tweet)
+            for time_list in time:
+                tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
+                         (time_list, username))
+                print(tweet)
+                # twitter.update_status(status=tweet)
         else:
             print('unkwon error')
             print(data, sep='\n', end='------------------------------',
