@@ -57,43 +57,23 @@ class MyStreamer(TwythonStreamer):
                 else:
                     print('no time in line')
 
-            # print(time)
-            # print('*******************')
-
-            # if len(time):
-            #    for index, item in enumerate(time):
-            #        print('*******************')
-            #        if len(re.findall('\/', str(item))) > 0:
-            #            time[index] = (str(dt_now.month) + '/' + str(dt_now.day) + ' ' + str(item))
-            #            print(time[index])
-            #        elif len(re.findall('日', str(item))) > 0:
-            #            time[index] = (str(dt_now.month) + '月' + str(dt_now.day) + '日' + ' ' + str(item))
-            #            print(time[index])
-            #        else:
-            #            print(time[index])
-            #        # time[0] = str(dt_now.month) + '月' + \
-            #        #    str(dt_now.day) + '日 ' + str(time[0])
-            #    print(time)
-
-            for time_list in time:
-                tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
-                         (time_list, username))
-                print(tweet)
-                # twitter.update_status(status=tweet)
+            if len(time) > 0:
+                for time_list in time:
+                    tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
+                             (time_list, username))
+                    print(tweet)
+                    twitter.update_status(status=tweet)
+            else:
+                print('no time tweet')
         else:
             print('unkwon error')
-            print(data, sep='\n', end='------------------------------',
-                  file=codecs.open('log.txt', 'w', 'utf-8'))
-
-        # Want to stop trying to get data because of the error?
-        # Uncomment the next line!
-        # self.disconnect()
+            #print(data, sep='\n', end='------------------------------', file=codecs.open('log.txt', 'w', 'utf-8'))
 
 
 print('awakening...')
-while True:
-    twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
+twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                       config.TW_TOKEN, config.TW_TOKEN_SECRET)
-    stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
+stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                         config.TW_TOKEN, config.TW_TOKEN_SECRET)
+while True:
     stream.statuses.filter(track='#星翼時報')
