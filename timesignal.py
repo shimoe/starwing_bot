@@ -39,15 +39,22 @@ class MyStreamer(TwythonStreamer):
                         item = str(dt_now.month) + '/' + \
                             str(dt_now.day) + ' ' + i
                         timesignal.append(item)
-            elif len(re.findall('[0-9]+時[0-9]+分', line)) > 0:
-                if len(re.findall('[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line)):
-                    timesignal.extend(re.findall(
-                        '[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line))
+            elif len(re.findall('[0-9]+分', line)) > 0:
+                if len(re.findall('[0-9]+時[0-9]+分', line)) > 0:
+                    if len(re.findall('[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line)):
+                        timesignal.extend(re.findall(
+                            '[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line))
+                    else:
+                        nodate = re.findall('[0-9]+時[0-9]+分', line)
+                        for i in nodate:
+                            item = str(dt_now.month) + '月' + str(dt_now.day) + \
+                                '日' + ' ' + i
+                            timesignal.append(item)
                 else:
-                    nodate = re.findall('[0-9]+時[0-9]+分', line)
-                    for i in nodate:
+                    nohour = re.findall('[0-9]+分', line)
+                    for i in nohour:
                         item = str(dt_now.month) + '月' + str(dt_now.day) + \
-                            '日' + ' ' + i
+                            '日' + ' ' + str(dt_now.hour) + i
                         timesignal.append(item)
             else:
                 print('no time in line')
