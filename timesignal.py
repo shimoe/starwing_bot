@@ -17,9 +17,6 @@ class MyStreamer(TwythonStreamer):
             print('Retweeted tweet')
         elif data['user']['screen_name'] == 'SW_Timesignal':
             print('self tweet')
-        elif 'quoted_status' in data:
-            print('Quoted tweet')
-            self.parse_tweet(data)
         else:
             self.parse_tweet(data)
 
@@ -64,20 +61,34 @@ class MyStreamer(TwythonStreamer):
             tweet = []
             time = []
 
-            time = self.serch_time_inline(data['text'])
+            if 'quoted_status' in data:
+                print('Quoted tweet')
+                base_text = data['text'].splitlines()
+                quoted_text = data['quoted_status']['text'].splitlines
 
-            if len(time) < 1:
-                if 'quoted_status' in data:
-                    self.serch_time_inline(data['quoted_status']['text'])
+                for base in base_text:
+                    tag_in_base = True if len(
+                        re.findall('#星翼時報', base)) > 0 else False
+                for quote in quoted_text:
+                    tag_in_quoted = True if len(
+                        re.findall('#星翼時報', quote)) > 0 else False
+
+                if tag_in_base == True and tag_in_quoted == False:
+                    time = self.serch_time_inline(data['text'])
+                elif tag_in_base == False and tag_in_quoted == True:
+                    time = self.serch_time_inline(
+                        data['quoted_status']['text'])
                 else:
-                    print('no time tweet')
+                    print('hash tag in both')
+            else:
+                time = self.serch_time_inline(data['text'])
 
             for time_list in time:
                 tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
                          (time_list, username))
                 print(tweet)
                 twitter.update_status(status=tweet)
-                #resources = twitter.get_application_rate_limit_status()
+                # resources = twitter.get_application_rate_limit_status()
 
         else:
             print('unkwon error')
