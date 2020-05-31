@@ -25,41 +25,41 @@ class MyStreamer(TwythonStreamer):
 
     def serch_time_inline(self, text):
         dt_now = datetime.datetime.now()
-        time = []
+        timesignal = []
         tweet_text = text.splitlines()
         # print(tweet_text)
         for line in tweet_text:
             if len(re.findall('[0-9]+:[0-9]+', line)) > 0:
                 if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', line)):
-                    time.extend(re.findall(
+                    timesignal.extend(re.findall(
                         '[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', line))
                 else:
                     nodate = re.findall('[0-9]+:[0-9]+', line)
                     for i in nodate:
                         item = str(dt_now.month) + '/' + \
                             str(dt_now.day) + ' ' + i
-                        time.append(item)
+                        timesignal.append(item)
             elif len(re.findall('[0-9]+時[0-9]+分', line)) > 0:
                 if len(re.findall('[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line)):
-                    time.extend(re.findall(
+                    timesignal.extend(re.findall(
                         '[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line))
                 else:
                     nodate = re.findall('[0-9]+時[0-9]+分', line)
                     for i in nodate:
                         item = str(dt_now.month) + '月' + str(dt_now.day) + \
                             '日' + ' ' + i
-                        time.append(item)
+                        timesignal.append(item)
             else:
                 print('no time in line')
 
-        return time
+        return timesignal
 
     def parse_tweet(self, data):
 
         if 'text' in data:
             username = data['user']['screen_name']
             tweet = []
-            time = []
+            timesignal = []
 
             if 'quoted_status' in data:
                 print('Quoted tweet')
@@ -74,16 +74,16 @@ class MyStreamer(TwythonStreamer):
                         re.findall('#星翼時報', quote)) > 0 else False
 
                 if tag_in_base == True and tag_in_quoted == False:
-                    time = self.serch_time_inline(data['text'])
+                    timesignal = self.serch_time_inline(data['text'])
                 elif tag_in_base == False and tag_in_quoted == True:
-                    time = self.serch_time_inline(
+                    timesignal = self.serch_time_inline(
                         data['quoted_status']['text'])
                 else:
                     print('hash tag in both')
             else:
-                time = self.serch_time_inline(data['text'])
+                timesignal = self.serch_time_inline(data['text'])
 
-            for time_list in time:
+            for time_list in timesignal:
                 tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
                          (time_list, username))
                 print(tweet)
@@ -95,10 +95,6 @@ class MyStreamer(TwythonStreamer):
             print(data, sep='\n', end='------------------------------',
                   file=codecs.open('log.json', 'w', 'utf-8'))
             self.disconnect()
-
-    # Want to stop trying to get data because of the error?
-    # Uncomment the next line!
-    # self.disconnect()
 
 
 print('awakening...')
