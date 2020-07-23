@@ -14,17 +14,17 @@ class MyStreamer(TwythonStreamer):
         # print('---------------------------------')
         time.sleep(3)
         if 'retweeted_status' in data:
-            status='retweeted'
+            status = 'retweeted'
            # print('Retweeted tweet')
         elif data['user']['screen_name'] == 'SW_Timesignal':
-            status='self_tweet'
+            status = 'self_tweet'
            # print('self tweet')
         else:
            # print('target tweet')
             self.parse_tweet(data)
 
     def on_error(self, status_code, data):
-        status='error'
+        status = 'error'
       #  print(status_code)
 
     def serch_time_inline(self, text):
@@ -79,7 +79,7 @@ class MyStreamer(TwythonStreamer):
                                 '日' + ' ' + i
                             timesignal.append(item)
             else:
-                status='no_time_in_line'
+                status = 'no_time_in_line'
                # print('no time in line')
 
         return timesignal
@@ -136,4 +136,11 @@ while True:
                       config.TW_TOKEN, config.TW_TOKEN_SECRET)
     stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                         config.TW_TOKEN, config.TW_TOKEN_SECRET)
+    # フォロワーのアカウントデータを取得
+    follower_list = twitter.get_followers_ids(count=400)  # デフォルトで20
+    for follower in follower_list['ids']:
+        print(follower)
+        print('------')
+        twitter.create_friendship(user_id=follower)
+
     stream.statuses.filter(track='#星翼時報')
