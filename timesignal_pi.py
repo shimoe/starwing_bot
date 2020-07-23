@@ -11,22 +11,25 @@ import time
 
 class MyStreamer(TwythonStreamer):
     def on_success(self, data):
-        print('---------------------------------')
+        # print('---------------------------------')
         time.sleep(3)
         if 'retweeted_status' in data:
-            print('Retweeted tweet')
+            status='retweeted'
+           # print('Retweeted tweet')
         elif data['user']['screen_name'] == 'SW_Timesignal':
-            print('self tweet')
+            status='self_tweet'
+           # print('self tweet')
         else:
-            print('target tweet')
+           # print('target tweet')
             self.parse_tweet(data)
 
     def on_error(self, status_code, data):
-        print(status_code)
+        status='error'
+      #  print(status_code)
 
     def serch_time_inline(self, text):
-        print(text)
-        print('*****************')
+       # print(text)
+       # print('*****************')
         dt_now = datetime.datetime.now()
         timesignal = []
         tweet_text = text.splitlines()
@@ -76,7 +79,8 @@ class MyStreamer(TwythonStreamer):
                                 '日' + ' ' + i
                             timesignal.append(item)
             else:
-                print('no time in line')
+                status='no_time_in_line'
+               # print('no time in line')
 
         return timesignal
 
@@ -88,7 +92,7 @@ class MyStreamer(TwythonStreamer):
             timesignal = []
 
             if 'quoted_status' in data:
-                print('Quoted tweet')
+               # print('Quoted tweet')
                 base_text = data['text'].splitlines()
                 quoted_text = data['quoted_status']['text'].splitlines()
 
@@ -109,25 +113,24 @@ class MyStreamer(TwythonStreamer):
                         data['text'])
                 else:
                     timesignal = self.serch_time_inline(data['text'])
-                    print('tag in both')
+                   # print('tag in both')
             else:
                 timesignal = self.serch_time_inline(data['text'])
 
             for time_list in timesignal:
                 tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
                          (time_list, username))
-                print(tweet)
+                # print(tweet)
                 twitter.update_status(status=tweet)
                 # resources = twitter.get_application_rate_limit_status()
 
         else:
-            print('unkwon error')
-            print(data, sep='\n', end='------------------------------',
-                  file=codecs.open('log.json', 'w', 'utf-8'))
+           # print('unkwon error')
+           # print(data, sep='\n', end='------------------------------',file=codecs.open('log.json', 'w', 'utf-8'))
             self.disconnect()
 
 
-print('awakening...')
+# print('awakening...')
 while True:
     twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                       config.TW_TOKEN, config.TW_TOKEN_SECRET)
