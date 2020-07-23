@@ -7,6 +7,7 @@ from twython import Twython, TwythonError, TwythonStreamer, TwythonStreamError
 import datetime
 import codecs
 import time
+import sys
 
 
 class MyStreamer(TwythonStreamer):
@@ -131,16 +132,19 @@ class MyStreamer(TwythonStreamer):
 
 
 # print('awakening...')
-while True:
-    twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
-                      config.TW_TOKEN, config.TW_TOKEN_SECRET)
-    stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
-                        config.TW_TOKEN, config.TW_TOKEN_SECRET)
-    # フォロワーのアカウントデータを取得
-    follower_list = twitter.get_followers_ids(count=400)  # デフォルトで20
-    for follower in follower_list['ids']:
-        print(follower)
-        print('------')
-        twitter.create_friendship(user_id=follower)
+twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
+                  config.TW_TOKEN, config.TW_TOKEN_SECRET)
+stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
+                    config.TW_TOKEN, config.TW_TOKEN_SECRET)
 
-    stream.statuses.filter(track='#星翼時報')
+# フォロワーのアカウントデータを取得
+follower_list = twitter.get_followers_ids(count=400)  # デフォルトで20
+follow_list = twitter.get_friends_ids(count=400)
+not_followed_list = set(follower_list['ids']) ^ set(follow_list['ids'])
+for follower in list(not_followed_list):
+    try:
+        twitter.create_friendship(user_id=follower)
+    except TwythonError:
+        continue
+
+stream.statuses.filter(track='#星翼時報')
