@@ -122,32 +122,35 @@ class MyStreamer(TwythonStreamer):
                 tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
                          (time_list, username))
                 # print(tweet)
-                twitter.update_status(status=tweet)
+                # twitter.update_status(status=tweet)
                 # resources = twitter.get_application_rate_limit_status()
 
         else:
            # print('unkwon error')
-           # print(data, sep='\n', end='------------------------------',file=codecs.open('log.json', 'w', 'utf-8'))
             self.disconnect()
 
 class TweetEditor():
     def delete_tweet(self):
         response = twitter.get_mentions_timeline(count=1)
+        print(response)
         if 'text' in response:
             print(response['id'])
             response_text = response['text'].splitlines()
             for line in response_text:
                 if re.match('削除', line):
+                    print("delete")
                    # twitter.destroy_status(id=response['id'])
+                else:
+                    continue
                     
             
-if __name__ == '__main__':
-    
+if __name__ == '__main__':    
     # print('awakening...')
     twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                       config.TW_TOKEN, config.TW_TOKEN_SECRET)
     stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                         config.TW_TOKEN, config.TW_TOKEN_SECRET)
+    editor = TweetEditor()
 
     # フォロワーのアカウントデータを取得
     follower_list = twitter.get_followers_ids(count=400)  # デフォルトで20
@@ -158,6 +161,8 @@ if __name__ == '__main__':
             twitter.create_friendship(user_id=follower)
         except TwythonError:
             continue
+    # ツイ消し
+    editor.delete_tweet()
     # 時報監視
     stream.statuses.filter(track='#星翼時報')
         
