@@ -134,13 +134,13 @@ class TweetEditor():
     def delete_tweet(self):
         responses = twitter.get_mentions_timeline(count=5)
         for reply in responses:
-            print(reply['text'])
+            # print(reply['text'])
             if 'text' in reply:
-                print("have text")
-                print(reply['in_reply_to_status_id'])
+                # print("have text")
+                # print(reply['in_reply_to_status_id'])
                 reply_text = re.search('削除', reply['text'])
                 if reply_text:
-                        print("delete")
+                        # print("delete")
                         twitter.destroy_status(id=reply['in_reply_to_status_id'])
                     
             
@@ -161,8 +161,8 @@ if __name__ == '__main__':
             twitter.create_friendship(user_id=follower)
         except TwythonError:
             continue
-        # ツイ消し
-        editor.delete_tweet()
-        # 時報監視
-        stream.statuses.filter(track='#星翼時報')
+    # ツイ消し
+    editor.delete_tweet()
+    # 時報監視
+    stream.statuses.filter(track='#星翼時報')
         
