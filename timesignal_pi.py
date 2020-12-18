@@ -8,18 +8,19 @@ import datetime
 import codecs
 import time
 import sys
+import json
 
 
 class MyStreamer(TwythonStreamer):
     def on_success(self, data):
         # print('---------------------------------')
-        time.sleep(3)
         if 'retweeted_status' in data:
             status = 'retweeted'
            # print('Retweeted tweet')
         elif data['user']['screen_name'] == 'SW_Timesignal':
             status = 'self_tweet'
-           # print('self tweet')
+            print('self tweet')
+            print(type(data))
         else:
            # print('target tweet')
             self.parse_tweet(data)
@@ -131,17 +132,16 @@ class MyStreamer(TwythonStreamer):
 
 class TweetEditor():
     def delete_tweet(self):
-        response = twitter.get_mentions_timeline(count=1)
-        print(response)
-        if 'text' in response:
-            print(response['id'])
-            response_text = response['text'].splitlines()
-            for line in response_text:
-                if re.match('削除', line):
-                    print("delete")
-                   # twitter.destroy_status(id=response['id'])
-                else:
-                    continue
+        responses = twitter.get_mentions_timeline(count=5)
+        for reply in responses:
+            print(reply['text'])
+            if 'text' in reply:
+                print("have text")
+                print(reply['in_reply_to_status_id'])
+                reply_text = re.search('削除', reply['text'])
+                if reply_text:
+                        print("delete")
+                        twitter.destroy_status(id=reply['in_reply_to_status_id'])
                     
             
 if __name__ == '__main__':    
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                         config.TW_TOKEN, config.TW_TOKEN_SECRET)
     editor = TweetEditor()
-
+    
     # フォロワーのアカウントデータを取得
     follower_list = twitter.get_followers_ids(count=400)  # デフォルトで20
     follow_list = twitter.get_friends_ids(count=400)
@@ -161,8 +161,8 @@ if __name__ == '__main__':
             twitter.create_friendship(user_id=follower)
         except TwythonError:
             continue
-    # ツイ消し
-    editor.delete_tweet()
-    # 時報監視
-    stream.statuses.filter(track='#星翼時報')
+        # ツイ消し
+        editor.delete_tweet()
+        # 時報監視
+        stream.statuses.filter(track='#星翼時報')
         
