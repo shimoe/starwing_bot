@@ -1,0 +1,14 @@
+[Unit]
+Description = starwing_bot
+
+[Service]
+ExecStart=/home/pi/workspace/starwing_bot/timesignal_pi.py
+WorkingDirectory=/home/pi/workspace/starwing_bot/
+StandardOutput=file:/home/pi/test.log
+StandardError=file:/home/pi/test.log
+RestartSec=2s
+Restart=on-failure
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
