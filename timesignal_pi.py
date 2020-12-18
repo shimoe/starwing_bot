@@ -140,8 +140,12 @@ class TweetEditor():
                 # print(reply['in_reply_to_status_id'])
                 reply_text = re.search('削除', reply['text'])
                 if reply_text:
-                        # print("delete")
+                    print("delete")
+                    try:
                         twitter.destroy_status(id=reply['in_reply_to_status_id'])
+                    except TwythonError as e:
+                        print("error")
+                    
                     
             
 if __name__ == '__main__':    
