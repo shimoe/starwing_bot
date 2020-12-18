@@ -123,7 +123,7 @@ class MyStreamer(TwythonStreamer):
                 tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
                          (time_list, username))
                 # print(tweet)
-                # twitter.update_status(status=tweet)
+                twitter.update_status(status=tweet)
                 # resources = twitter.get_application_rate_limit_status()
 
         else:
@@ -140,16 +140,20 @@ class TweetEditor():
                 # print(reply['in_reply_to_status_id'])
                 reply_text = re.search('削除', reply['text'])
                 if reply_text:
-                    print("delete")
                     try:
-                        twitter.destroy_status(id=reply['in_reply_to_status_id'])
+                        target = twitter.show_status(id=reply['in_reply_to_status_id'])
+                        # print(target['text'])
+                        # print(reply['user']['screen_name'])
+                        if reply['user']['screen_name'] in target['text']:
+                            # print("claim!") 
+                            twitter.destroy_status(id=reply['in_reply_to_status_id'])
                     except TwythonError as e:
                         print("error")
                     
                     
             
 if __name__ == '__main__':    
-    # print('awakening...')
+    print('awakening...')
     twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                       config.TW_TOKEN, config.TW_TOKEN_SECRET)
     stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
@@ -157,14 +161,18 @@ if __name__ == '__main__':
     editor = TweetEditor()
     
     # フォロワーのアカウントデータを取得
-    follower_list = twitter.get_followers_ids(count=400)  # デフォルトで20
-    follow_list = twitter.get_friends_ids(count=400)
-    not_followed_list = set(follower_list['ids']) ^ set(follow_list['ids'])
-    for follower in list(not_followed_list):
-        try:
-            twitter.create_friendship(user_id=follower)
-        except TwythonError:
-            continue
+    try:
+        follower_list = twitter.get_followers_ids(count=400)  # デフォルトで20
+        follow_list = twitter.get_friends_ids(count=400)
+        not_followed_list = set(follower_list['ids']) ^ set(follow_list['ids'])
+        for follower in list(not_followed_list):
+            try:
+                twitter.create_friendship(user_id=follower)
+            except TwythonError:
+                continue
+    except TwythonError as e:
+        print("get follow error")
+        
     # ツイ消し
     editor.delete_tweet()
     # 時報監視
