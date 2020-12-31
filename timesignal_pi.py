@@ -9,6 +9,7 @@ import codecs
 import time
 import sys
 import logging
+import json
 
 logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 logging.disable(logging.CRITICAL)
@@ -16,7 +17,6 @@ logging.disable(logging.CRITICAL)
 class MyStreamer(TwythonStreamer):
     def on_success(self, data):
         # logging.debug('---------------------------------')
-        time.sleep(3)
         if 'retweeted_status' in data:
             status = 'retweeted'
             logging.debug('Retweeted tweet')
@@ -135,32 +135,49 @@ class MyStreamer(TwythonStreamer):
 
 class TweetEditor():
     def delete_tweet(self):
-        response = twitter.get_mentions_timeline(count=1)
-        if 'text' in response:
-            logging.debug(response['id'])
-            response_text = response['text'].splitlines()
-            for line in response_text:
-                if re.match('削除', line):
-                   # twitter.destroy_status(id=response['id'])
+        responses = twitter.get_mentions_timeline(count=5)
+        for reply in responses:
+            # logging.debug(reply['text'])
+            if 'text' in reply:
+                # logging.debug("have text")
+                # logging.debug(reply['in_reply_to_status_id'])
+                reply_text = re.search('削除', reply['text'])
+                if reply_text:
+                    try:
+                        target = twitter.show_status(id=reply['in_reply_to_status_id'])
+                        # logging.debug(target['text'])
+                        # logging.debug(reply['user']['screen_name'])
+                        if reply['user']['screen_name'] in target['text']:
+                            # logging.debug("claim!") 
+                            twitter.destroy_status(id=reply['in_reply_to_status_id'])
+                    except TwythonError as e:
+                        logging.debug("error")
+                    
                     
             
-if __name__ == '__main__':
-    
-     logging.debug('awakening...')
+if __name__ == '__main__':    
+    logging.debug('awakening...')
     twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                       config.TW_TOKEN, config.TW_TOKEN_SECRET)
     stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                         config.TW_TOKEN, config.TW_TOKEN_SECRET)
-
+    editor = TweetEditor()
+    
     # フォロワーのアカウントデータを取得
-    follower_list = twitter.get_followers_ids(count=400)  # デフォルトで20
-    follow_list = twitter.get_friends_ids(count=400)
-    not_followed_list = set(follower_list['ids']) ^ set(follow_list['ids'])
-    for follower in list(not_followed_list):
-        try:
-            twitter.create_friendship(user_id=follower)
-        except TwythonError:
-            continue
+    try:
+        follower_list = twitter.get_followers_ids(count=400)  # デフォルトで20
+        follow_list = twitter.get_friends_ids(count=400)
+        not_followed_list = set(follower_list['ids']) ^ set(follow_list['ids'])
+        for follower in list(not_followed_list):
+            try:
+                twitter.create_friendship(user_id=follower)
+            except TwythonError:
+                continue
+    except TwythonError as e:
+        logging.debug("get follow error")
+        
+    # ツイ消し
+    editor.delete_tweet()
     # 時報監視
     stream.statuses.filter(track='#星翼時報')
         
