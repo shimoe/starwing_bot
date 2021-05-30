@@ -8,36 +8,35 @@ import datetime
 import codecs
 import time
 import sys
-import logging
 import json
 
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
-logging.disable(logging.CRITICAL)
 
 class MyStreamer(TwythonStreamer):
     def on_success(self, data):
-        # logging.debug('---------------------------------')
+        # print('---------------------------------')
         if 'retweeted_status' in data:
             status = 'retweeted'
-            logging.debug('Retweeted tweet')
+            # print('Retweeted tweet')
         elif data['user']['screen_name'] == 'SW_Timesignal':
             status = 'self_tweet'
-            logging.debug('self tweet')
+            print('self tweet')
+            print(type(data))
+            print(data['text'])
         else:
-            logging.debug('target tweet')
+            print('target tweet')
             self.parse_tweet(data)
 
     def on_error(self, status_code, data):
+        print(status_code)
         status = 'error'
-        logging.debug(status_code)
-
+        
     def serch_time_inline(self, text):
-        logging.debug(text)
-        logging.debug('*****************')
+        # print(text)
+        # print('*****************')
         dt_now = datetime.datetime.now()
         timesignal = []
         tweet_text = text.splitlines()
-         logging.debug(tweet_text)
+        # print(tweet_text)
         for line in tweet_text:
             if len(re.findall('[0-9]+:[0-9]+', line)) > 0:
                 if len(re.findall('[0-9]+\/[0-9]+\s+[0-9]+:[0-9]+', line)):
@@ -50,9 +49,9 @@ class MyStreamer(TwythonStreamer):
                             str(dt_now.day) + ' ' + i
                         timesignal.append(item)
             elif len(re.findall('[0-9]+分', line)) > 0 or len(re.findall('[0-9]+時', line)) > 0:
-                 logging.debug('jap')
+                # print('jap')
                 if len(re.findall('[0-9]+分', line)) > 0 and len(re.findall('[0-9]+時', line)) < 1:
-                    logging.debug('no hour')
+                    #print('no hour')
                     nohour = re.findall('[0-9]+分', line)
                     for i in nohour:
                         time_value = re.findall('[0-9]+', i)
@@ -65,14 +64,14 @@ class MyStreamer(TwythonStreamer):
                                 '日' + ' ' + str(int(dt_now.hour) + 1) + '時' + i
                             timesignal.append(item)
                 elif len(re.findall('[0-9]+分', line)) < 1 and len(re.findall('[0-9]+時', line)) > 0:
-                    logging.debug('no minute')
+                    #print('no minute')
                     nominute = re.findall('[0-9]+時', line)
                     for i in nominute:
                         item = str(dt_now.month) + '月' + str(dt_now.day) + \
                             '日' + ' ' + i + '00分'
                         timesignal.append(item)
                 elif len(re.findall('[0-9]+時[0-9]+分', line)) > 0:
-                    logging.debug('time in line')
+                    print('time in line')
                     if len(re.findall('[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line)):
                         timesignal.extend(re.findall(
                             '[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line))
@@ -84,7 +83,7 @@ class MyStreamer(TwythonStreamer):
                             timesignal.append(item)
             else:
                 status = 'no_time_in_line'
-                logging.debug('no time in line')
+                print('no time in line')
 
         return timesignal
 
@@ -96,7 +95,7 @@ class MyStreamer(TwythonStreamer):
             timesignal = []
 
             if 'quoted_status' in data:
-                logging.debug('Quoted tweet')
+               # print('Quoted tweet')
                 base_text = data['text'].splitlines()
                 quoted_text = data['quoted_status']['text'].splitlines()
 
@@ -108,55 +107,56 @@ class MyStreamer(TwythonStreamer):
                         re.findall('#星翼時報', quote)) > 0 else False
 
                 if tag_in_base == True and tag_in_quoted == False:
-                    logging.debug('tag in base')
+                    print('tag in base')
                     timesignal = self.serch_time_inline(
                         data['quoted_status']['text'])
                 elif tag_in_base == False and tag_in_quoted == True:
-                    logging.debug('tag in quote')
+                    print('tag in quote')
                     timesignal = self.serch_time_inline(
                         data['text'])
                 else:
                     timesignal = self.serch_time_inline(data['text'])
-                    logging.debug('tag in both')
+                   # print('tag in both')
             else:
                 timesignal = self.serch_time_inline(data['text'])
 
             for time_list in timesignal:
                 tweet = ("【星翼時報速報】\n %s \n from @%s \n#星翼\n#星翼時報" %
                          (time_list, username))
-                 logging.debug(tweet)
+                # print(tweet)
                 twitter.update_status(status=tweet)
                 # resources = twitter.get_application_rate_limit_status()
 
         else:
-            logging.debug('unkwon error')
-            logging.debug(data, sep='\n', end='------------------------------',file=codecs.open('log.json', 'w', 'utf-8'))
+           # print('unkwon error')
             self.disconnect()
 
 class TweetEditor():
     def delete_tweet(self):
         responses = twitter.get_mentions_timeline(count=5)
         for reply in responses:
-            # logging.debug(reply['text'])
+            # print(reply['text'])
             if 'text' in reply:
-                # logging.debug("have text")
-                # logging.debug(reply['in_reply_to_status_id'])
+                # print("have text")
+                # print(reply['in_reply_to_status_id'])
                 reply_text = re.search('削除', reply['text'])
                 if reply_text:
                     try:
                         target = twitter.show_status(id=reply['in_reply_to_status_id'])
-                        # logging.debug(target['text'])
-                        # logging.debug(reply['user']['screen_name'])
+                        # print(target['text'])
+                        # print(reply['user']['screen_name'])
                         if reply['user']['screen_name'] in target['text']:
-                            # logging.debug("claim!") 
+                            # print("claim!") 
                             twitter.destroy_status(id=reply['in_reply_to_status_id'])
                     except TwythonError as e:
-                        logging.debug("error")
-                    
+                        print("get reply error"+"\r", end='')
+                        pass
+        print('')
                     
             
-if __name__ == '__main__':    
-    logging.debug('awakening...')
+if __name__ == '__main__':
+    awaken_time = datetime.datetime.now()
+    print('awaken ', awaken_time.strftime('%m-%d %H:%M:%S'))
     twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                       config.TW_TOKEN, config.TW_TOKEN_SECRET)
     stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
@@ -174,7 +174,7 @@ if __name__ == '__main__':
             except TwythonError:
                 continue
     except TwythonError as e:
-        logging.debug("get follow error")
+        print("get follow error")
         
     # ツイ消し
     editor.delete_tweet()
