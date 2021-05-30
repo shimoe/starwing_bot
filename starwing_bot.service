@@ -2,12 +2,12 @@
 Description = starwing_bot
 
 [Service]
-ExecStart=/home/pi/workspace/starwing_bot/timesignal_pi.py
+ExecStart=/usr/bin/python -u /home/pi/workspace/starwing_bot/timesignal_pi.py
 WorkingDirectory=/home/pi/workspace/starwing_bot/
 StandardOutput=file:/home/pi/test.log
 StandardError=file:/home/pi/test.log
-RestartSec=2s
-RuntimeMaxSec=10s
+RestartSec=1s
+RuntimeMaxSec=2m
 Restart=on-failure
 Type=simple
 

@@ -16,22 +16,23 @@ class MyStreamer(TwythonStreamer):
         # print('---------------------------------')
         if 'retweeted_status' in data:
             status = 'retweeted'
-           # print('Retweeted tweet')
+            # print('Retweeted tweet')
         elif data['user']['screen_name'] == 'SW_Timesignal':
             status = 'self_tweet'
             print('self tweet')
             print(type(data))
+            print(data['text'])
         else:
-           # print('target tweet')
+            print('target tweet')
             self.parse_tweet(data)
 
     def on_error(self, status_code, data):
+        print(status_code)
         status = 'error'
-      #  print(status_code)
-
+        
     def serch_time_inline(self, text):
-       # print(text)
-       # print('*****************')
+        # print(text)
+        # print('*****************')
         dt_now = datetime.datetime.now()
         timesignal = []
         tweet_text = text.splitlines()
@@ -70,7 +71,7 @@ class MyStreamer(TwythonStreamer):
                             '日' + ' ' + i + '00分'
                         timesignal.append(item)
                 elif len(re.findall('[0-9]+時[0-9]+分', line)) > 0:
-                    #print('time in line')
+                    print('time in line')
                     if len(re.findall('[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line)):
                         timesignal.extend(re.findall(
                             '[0-9]+月[0-9]+日\s[0-9]+時[0-9]+分', line))
@@ -82,7 +83,7 @@ class MyStreamer(TwythonStreamer):
                             timesignal.append(item)
             else:
                 status = 'no_time_in_line'
-               # print('no time in line')
+                print('no time in line')
 
         return timesignal
 
@@ -148,12 +149,14 @@ class TweetEditor():
                             # print("claim!") 
                             twitter.destroy_status(id=reply['in_reply_to_status_id'])
                     except TwythonError as e:
-                        print("error")
-                    
+                        print("get reply error"+"\r", end='')
+                        pass
+        print('')
                     
             
-if __name__ == '__main__':    
-    print('awakening...')
+if __name__ == '__main__':
+    awaken_time = datetime.datetime.now()
+    print('awaken ', awaken_time.strftime('%m-%d %H:%M:%S'))
     twitter = Twython(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
                       config.TW_TOKEN, config.TW_TOKEN_SECRET)
     stream = MyStreamer(config.TW_CONSUMER_KEY, config.TW_CONSUMER_SECRET,
